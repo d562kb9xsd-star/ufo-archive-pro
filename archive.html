@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archive · UFO Archive Pro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-alt">
+  <header class="site-header">
+    <div class="container site-header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark">🛸</span>
+        <span data-site-name>UFO Archive Pro</span>
+      </a>
+
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="archive.html" class="active">Archive</a>
+        <a href="submit.html">Submit</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div class="container">
+      <section class="glass page-hero">
+        <div class="eyebrow">Public archive</div>
+        <h1>Approved UFO reports and published evidence</h1>
+        <p class="lead">Browse public sightings, search titles and locations, and view approved cases only.</p>
+      </section>
+
+      <section class="section">
+        <div class="glass archive-toolbar">
+          <input id="search" type="text" placeholder="Search reports, locations, tags..." />
+          <select id="type-filter">
+            <option value="all">All types</option>
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+            <option value="document">Document</option>
+            <option value="report">Report</option>
+          </select>
+        </div>
+
+        <div id="archive-results" class="cases-grid"></div>
+      </section>
+    </div>
+
+    <div id="case-modal" class="modal hidden">
+      <div class="glass modal-card">
+        <div class="inline-actions" style="justify-content:flex-end; margin-top:0; margin-bottom:14px;">
+          <button class="button button-secondary modal-close" data-close-modal>Close</button>
+        </div>
+        <div id="case-modal-content"></div>
+      </div>
+    </div>
+
+    <div class="container footer">
+      Public archive of approved UFO cases only.
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>

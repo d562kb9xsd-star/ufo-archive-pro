@@ -1,0 +1,12 @@
+{
+  "name": "ufo-supabase-archive",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Supabase-ready UFO evidence archive site",
+  "scripts": {
+    "start": "npx serve public -l 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
