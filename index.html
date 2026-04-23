@@ -3,17 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <title>UFO Archive Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #fff;
+    }
+
+    header {
+      padding: 20px;
+      background: #111827;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav a {
+      color: #9ca3af;
+      margin-left: 20px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: #fff;
+    }
+
+    .hero {
+      padding: 40px;
+      background: linear-gradient(to right, #111827, #1e293b);
+    }
+
+    .hero h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
-<body style="background:#0b0f1a;color:white;font-family:Arial;padding:20px;">
+<body>
 
-  <h1>UFO Archive Pro</h1>
+<header>
+  <h2>UFO Archive Pro</h2>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="archive.html">Archive</a>
+    <a href="submit.html">Submit</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
 
-  <p>
-    <a href="archive.html" style="color:#60a5fa;">
-      View Public Archive →
-    </a>
-  </p>
+<section class="hero">
+  <h1>Report sightings and explore verified UFO encounters</h1>
+  <p>Submit your own sightings or browse the archive of approved cases.</p>
+  <a href="archive.html" class="button">View Public Archive</a>
+</section>
+
+<div class="container">
+  <h2>Welcome</h2>
+  <p>This archive allows users to submit UFO sightings and view approved reports.</p>
+</div>
 
 </body>
 </html>
