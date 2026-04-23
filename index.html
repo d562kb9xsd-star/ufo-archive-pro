@@ -1,84 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UFO Archive Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #0b1220;
-      color: #fff;
+      background: radial-gradient(circle at top, #17233f 0%, #0b1220 45%, #070d18 100%);
+      color: #ffffff;
     }
 
-    header {
-      padding: 20px;
-      background: #111827;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    nav a {
-      color: #9ca3af;
-      margin-left: 20px;
+    a {
+      color: inherit;
       text-decoration: none;
-    }
-
-    nav a:hover {
-      color: #fff;
-    }
-
-    .hero {
-      padding: 40px;
-      background: linear-gradient(to right, #111827, #1e293b);
-    }
-
-    .hero h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
     }
 
     .container {
-      padding: 20px;
+      width: min(1200px, calc(100% - 48px));
+      margin: 0 auto;
     }
 
-    .button {
+    header {
+      padding: 22px 0;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand::before {
+      content: "🛸";
+      font-size: 18px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 26px;
+      align-items: center;
+    }
+
+    .menu a {
+      color: #d7deee;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      color: #ffffff;
+    }
+
+    .hero-wrap {
+      padding: 24px 0 40px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap: 24px;
+      align-items: stretch;
+      background: linear-gradient(180deg, rgba(20,31,56,0.98), rgba(13,22,40,0.98));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .eyebrow {
       display: inline-block;
-      padding: 10px 20px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #b8c7ff;
+      background: rgba(99, 132, 255, 0.14);
+      border: 1px solid rgba(138, 163, 255, 0.18);
+      border-radius: 999px;
+      padding: 7px 12px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(38px, 5vw, 66px);
+      line-height: 0.95;
+      letter-spacing: -1.8px;
+      margin: 0 0 18px;
+      max-width: 760px;
+    }
+
+    .hero p {
+      color: #c8d2e8;
+      font-size: 17px;
+      line-height: 1.6;
+      margin: 0 0 26px;
+      max-width: 680px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #7ea2ff, #5d7dff);
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(93,125,255,0.28);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.12);
+      color: #ffffff;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      margin-top: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: #aab6d1;
+      font-size: 13px;
+    }
+
+    .hero-panel {
+      background: linear-gradient(180deg, rgba(27,40,68,0.95), rgba(18,29,50,0.95));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .hero-panel h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .hero-panel ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #c8d2e8;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .feature-grid {
+      padding: 8px 0 60px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(17,26,45,0.98), rgba(12,19,34,0.98));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
+
+    .card h4 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0;
+      color: #c1cce5;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    @media (max-width: 960px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .menu {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      h1 {
+        font-size: 42px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        width: min(100% - 28px, 1200px);
+      }
+
+      .hero {
+        padding: 24px;
+      }
+
+      .nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .menu {
+        justify-content: flex-start;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
     }
   </style>
 </head>
-
 <body>
+  <header>
+    <div class="container nav">
+      <div class="brand">UFO Archive Pro</div>
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="archive.html">Archive</a>
+        <a href="submit.html">Submit</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
 
-<header>
-  <h2>UFO Archive Pro</h2>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="archive.html">Archive</a>
-    <a href="submit.html">Submit</a>
-    <a href="admin.html">Admin</a>
-  </nav>
-</header>
+  <main class="container hero-wrap">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Evidence-led UFO reporting platform</span>
+        <h1>Report sightings, upload evidence, and publish reviewed cases professionally.</h1>
+        <p>
+          UFO Archive Pro is a moderated public archive for witness reports,
+          media uploads, and case studies. Visitors submit reports, moderators
+          review the evidence, and approved sightings appear in the public archive.
+        </p>
 
-<section class="hero">
-  <h1>Report sightings and explore verified UFO encounters</h1>
-  <p>Submit your own sightings or browse the archive of approved cases.</p>
-  <a href="archive.html" class="button">View Public Archive</a>
-</section>
+        <div class="actions">
+          <a class="btn btn-primary" href="submit.html">Submit a case</a>
+          <a class="btn btn-secondary" href="archive.html">Browse archive</a>
+          <a class="btn btn-secondary" href="admin.html">Admin panel</a>
+        </div>
 
-<div class="container">
-  <h2>Welcome</h2>
-  <p>This archive allows users to submit UFO sightings and view approved reports.</p>
-</div>
+        <div class="stats">
+          <div class="stat">
+            <strong>4</strong>
+            <span>evidence types</span>
+          </div>
+          <div class="stat">
+            <strong>1</strong>
+            <span>admin dashboard</span>
+          </div>
+          <div class="stat">
+            <strong>∞</strong>
+            <span>case growth potential</span>
+          </div>
+        </div>
+      </div>
 
+      <aside class="hero-panel">
+        <div>
+          <h3>Included in this build</h3>
+          <ul>
+            <li>Public UFO archive with search and filters</li>
+            <li>Submission form with media upload</li>
+            <li>Case study text fields and witness summaries</li>
+            <li>Admin moderation and approval tools</li>
+            <li>Supabase database and storage integration</li>
+            <li>Responsive dark design with a branded feel</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <section class="feature-grid">
+      <div class="card">
+        <h4>Public archive</h4>
+        <p>
+          Show approved sightings with timestamps, locations, summaries, and media
+          in a clean searchable layout.
+        </p>
+      </div>
+
+      <div class="card">
+        <h4>Admin review queue</h4>
+        <p>
+          Approve, reject, and remove submissions from one dashboard secured with
+          your admin workflow.
+        </p>
+      </div>
+
+      <div class="card">
+        <h4>Controlled publishing</h4>
+        <p>
+          Only approved reports reach the public archive, helping keep the content
+          cleaner and more credible.
+        </p>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
