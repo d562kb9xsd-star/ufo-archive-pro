@@ -1,4 +1,4 @@
-const ADMIN_PASSWORD = "ufocases123";
+const ADMIN_PASSWORD = "MyUfoAdmin2026!";
 
 const loginArea = document.getElementById("loginArea");
 const adminArea = document.getElementById("adminArea");
