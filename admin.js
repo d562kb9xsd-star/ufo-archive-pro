@@ -1,66 +1,34 @@
-(() => {
-  const supabase = window.supabase.createClient(
-    window.UFO_APP_CONFIG.supabaseUrl,
-    window.UFO_APP_CONFIG.supabaseAnonKey
-  );
+const supabase = window.supabase.createClient(
+  window.UFO_APP_CONFIG.supabaseUrl,
+  window.UFO_APP_CONFIG.supabaseAnonKey
+);
 
-  const loginWrap = document.getElementById("admin-login");
-  const protectedWrap = document.getElementById("admin-protected");
-  const emailInput = document.getElementById("admin-email");
-  const passwordInput = document.getElementById("admin-password");
-  const loginBtn = document.getElementById("admin-login-btn");
-  const logoutBtn = document.getElementById("admin-logout-btn");
-  const loginStatus = document.getElementById("admin-login-status");
-  const listEl = document.getElementById("admin-list");
-  const statusEl = document.getElementById("admin-status");
+const loginWrap = document.getElementById("admin-login");
+const protectedWrap = document.getElementById("admin-protected");
+const emailInput = document.getElementById("admin-email");
+const passwordInput = document.getElementById("admin-password");
+const loginBtn = document.getElementById("admin-login-btn");
+const loginStatus = document.getElementById("admin-login-status");
+const signoutBtn = document.getElementById("admin-signout-btn");
+const listEl = document.getElementById("admin-list");
+const statusEl = document.getElementById("admin-status");
 
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
 
-  async function getCurrentAdminProfile() {
-    const {
-      data: { user },
-      error: userError
-    } = await supabase.auth.getUser();
+async function loadPending() {
+  if (!listEl || !statusEl) return;
 
-    if (userError || !user) return null;
+  statusEl.textContent = "Loading pending cases...";
+  listEl.innerHTML = "";
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id,email,role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile || profile.role !== "admin") {
-      return null;
-    }
-
-    return { user, profile };
-  }
-
-  function showProtectedArea() {
-    loginWrap.style.display = "block";
-    protectedWrap.style.display = "block";
-    logoutBtn.style.display = "inline-flex";
-  }
-
-  function hideProtectedArea() {
-    protectedWrap.style.display = "none";
-    logoutBtn.style.display = "none";
-    listEl.innerHTML = "";
-    statusEl.textContent = "";
-  }
-
-  async function loadPending() {
-    statusEl.textContent = "Loading pending cases...";
-    listEl.innerHTML = "";
-
+  try {
     const { data, error } = await supabase
       .from("cases")
       .select("*")
@@ -94,11 +62,16 @@
       `;
       listEl.appendChild(card);
     });
+  } catch (error) {
+    console.error(error);
+    statusEl.textContent = "Error loading pending cases.";
   }
+}
 
-  async function updateCase(id, newStatus) {
-    statusEl.textContent = "Updating case...";
+async function updateCase(id, newStatus) {
+  statusEl.textContent = "Updating case...";
 
+  try {
     const { error } = await supabase
       .from("cases")
       .update({ status: newStatus })
@@ -111,9 +84,97 @@
 
     statusEl.textContent = `Case marked as ${newStatus}.`;
     await loadPending();
+  } catch (error) {
+    console.error(error);
+    statusEl.textContent = "Error updating case.";
+  }
+}
+
+async function signIn(email, password) {
+  loginStatus.textContent = "Signing in...";
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    loginStatus.textContent = "Sign-in failed: " + error.message;
+    return;
   }
 
-  async function signIn() {
+  const user = data.user;
+
+  if (!user) {
+    loginStatus.textContent = "No user returned.";
+    return;
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) {
+    loginStatus.textContent = "Profile check failed: " + profileError.message;
+    return;
+  }
+
+  if (!profile || profile.role !== "admin") {
+    loginStatus.textContent = "Not authorised.";
+    await supabase.auth.signOut();
+    return;
+  }
+
+  loginStatus.textContent = "";
+  loginWrap.style.display = "none";
+  protectedWrap.style.display = "block";
+  await loadPending();
+}
+
+async function checkSession() {
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error || !data.session) {
+    loginWrap.style.display = "block";
+    protectedWrap.style.display = "none";
+    return;
+  }
+
+  const user = data.session.user;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile || profile.role !== "admin") {
+    await supabase.auth.signOut();
+    loginWrap.style.display = "block";
+    protectedWrap.style.display = "none";
+    loginStatus.textContent = "Not authorised.";
+    return;
+  }
+
+  loginWrap.style.display = "none";
+  protectedWrap.style.display = "block";
+  await loadPending();
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  protectedWrap.style.display = "none";
+  loginWrap.style.display = "block";
+  loginStatus.textContent = "Signed out.";
+  statusEl.textContent = "";
+  listEl.innerHTML = "";
+  passwordInput.value = "";
+}
+
+if (loginBtn) {
+  loginBtn.addEventListener("click", async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
@@ -122,39 +183,31 @@
       return;
     }
 
-    loginStatus.textContent = "Signing in...";
+    await signIn(email, password);
+  });
+}
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+if (passwordInput) {
+  passwordInput.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
 
-    if (error) {
-      loginStatus.textContent = `Sign-in failed: ${error.message}`;
-      hideProtectedArea();
-      return;
+      if (!email || !password) {
+        loginStatus.textContent = "Enter email and password.";
+        return;
+      }
+
+      await signIn(email, password);
     }
+  });
+}
 
-    const admin = await getCurrentAdminProfile();
+if (signoutBtn) {
+  signoutBtn.addEventListener("click", signOut);
+}
 
-    if (!admin) {
-      loginStatus.textContent = "This account is not an admin.";
-      await supabase.auth.signOut();
-      hideProtectedArea();
-      return;
-    }
-
-    loginStatus.textContent = `Signed in as ${admin.profile.email}.`;
-    showProtectedArea();
-    await loadPending();
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut();
-    loginStatus.textContent = "Signed out.";
-    hideProtectedArea();
-  }
-
+if (listEl) {
   listEl.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-action]");
     if (!button) return;
@@ -168,27 +221,6 @@
       await updateCase(id, "rejected");
     }
   });
+}
 
-  loginBtn.addEventListener("click", signIn);
-  logoutBtn.addEventListener("click", signOut);
-
-  passwordInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") signIn();
-  });
-
-  emailInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") signIn();
-  });
-
-  (async () => {
-    const admin = await getCurrentAdminProfile();
-
-    if (admin) {
-      loginStatus.textContent = `Signed in as ${admin.profile.email}.`;
-      showProtectedArea();
-      await loadPending();
-    } else {
-      hideProtectedArea();
-    }
-  })();
-})();
+checkSession();
