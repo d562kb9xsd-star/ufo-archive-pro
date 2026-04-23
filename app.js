@@ -25,7 +25,7 @@
 
     const url =
       window.UFO_APP_CONFIG.supabaseUrl +
-      "/rest/v1/cases?status=eq.approved&select=*";
+      "/rest/v1/cases?status=eq.approved&select=*&order=created_at.desc";
 
     const res = await fetch(url, {
       headers: {
