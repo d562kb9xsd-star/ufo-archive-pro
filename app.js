@@ -1,10 +1,7 @@
 (async () => {
   const container = document.getElementById("archive-list");
 
-  if (!container) {
-    console.error("archive-list not found");
-    return;
-  }
+  if (!container) return;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -37,37 +34,42 @@
       }
     });
 
+    if (!res.ok) {
+      const text = await res.text();
+      container.innerHTML = `<p>Error ${res.status}: ${escapeHtml(text)}</p>`;
+      return;
+    }
+
     const data = await res.json();
 
-    console.log("DATA:", data);
-
-    if (!data || data.length === 0) {
-      container.innerHTML = "<p>No approved cases found.</p>";
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = "<p>No approved UFO cases found.</p>";
       return;
     }
 
     container.innerHTML = "";
 
     data.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "case";
+      const tags = normaliseTags(item.tags);
+      const tagHtml = tags
+        .map(tag => `<span class="badge">${escapeHtml(tag)}</span>`)
+        .join("");
 
-      const tags = normaliseTags(item.tags)
-        .map(t => `<span class="badge">${escapeHtml(t)}</span>`)
-        .join(" ");
+      const card = document.createElement("div");
+      card.className = "case";
 
-      div.innerHTML = `
-        <h3>${escapeHtml(item.title || "Untitled Case")}</h3>
+      card.innerHTML = `
+        <h3>${escapeHtml(item.title || "Untitled")}</h3>
         <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
-        <p>${escapeHtml(item.description || "")}</p>
-        <p>${tags}</p>
+        <p><strong>Date:</strong> ${escapeHtml(item.date_observed || item.created_at || "Unknown")}</p>
+        <p>${escapeHtml(item.summary || item.description || "")}</p>
+        ${tagHtml ? `<div>${tagHtml}</div>` : ""}
       `;
 
-      container.appendChild(div);
+      container.appendChild(card);
     });
-
   } catch (err) {
-    console.error("ERROR:", err);
-    container.innerHTML = "<p>Error loading cases.</p>";
+    console.error(err);
+    container.innerHTML = `<p>Error loading cases.</p>`;
   }
 })();
