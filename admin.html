@@ -24,34 +24,34 @@
       <h1>Admin Review Queue</h1>
       <p class="page-intro">Sign in with your admin email and password.</p>
 
-      <form id="login-form" class="form-grid">
+      <div id="admin-login" class="form-grid">
         <div>
-          <label for="email">Email</label>
-          <input id="email" type="email" placeholder="Enter admin email" required />
+          <label for="admin-email">Email</label>
+          <input id="admin-email" type="email" placeholder="Enter admin email" />
         </div>
 
         <div>
-          <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Enter password" required />
+          <label for="admin-password">Password</label>
+          <input id="admin-password" type="password" placeholder="Enter password" />
         </div>
 
-        <button class="btn btn-primary" type="submit">Sign in</button>
-      </form>
+        <button id="admin-login-btn" class="btn btn-primary" type="button">Sign in</button>
+      </div>
 
-      <p id="status" class="status-message"></p>
+      <p id="admin-login-status" class="status-message"></p>
 
-      <div id="admin-panel" style="display:none;">
+      <div id="admin-protected" style="display:none;">
         <div class="admin-actions" style="margin-bottom:16px;">
-          <button id="signout-btn" class="btn btn-secondary" type="button">Sign out</button>
+          <button id="admin-signout-btn" class="btn btn-secondary" type="button">Sign out</button>
         </div>
-
-        <div id="cases-list" class="admin-list"></div>
+        <p id="admin-status" class="status-message"></p>
+        <div id="admin-list" class="admin-list"></div>
       </div>
     </div>
   </main>
 
-  <script src="config.js?v=7"></script>
+  <script src="config.js?v=9"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="admin.js?v=7"></script>
+  <script src="admin.js?v=9"></script>
 </body>
 </html>
