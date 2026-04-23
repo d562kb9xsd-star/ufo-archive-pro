@@ -3,80 +3,109 @@ const supabase = window.supabase.createClient(
   window.UFO_APP_CONFIG.supabaseAnonKey
 );
 
-const loginWrap = document.getElementById("admin-login");
-const protectedWrap = document.getElementById("admin-protected");
-const emailInput = document.getElementById("admin-email");
-const passwordInput = document.getElementById("admin-password");
-const loginBtn = document.getElementById("admin-login-btn");
-const loginStatus = document.getElementById("admin-login-status");
-const signoutBtn = document.getElementById("admin-signout-btn");
-const listEl = document.getElementById("admin-list");
-const statusEl = document.getElementById("admin-status");
+const loginForm = document.getElementById("login-form");
+const adminPanel = document.getElementById("admin-panel");
+const listEl = document.getElementById("cases-list");
+const statusEl = document.getElementById("status");
 
-function log(msg) {
-  console.log(msg);
-  loginStatus.textContent = msg;
-}
+// =====================
+// LOGIN
+// =====================
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-async function signIn() {
-  log("Signing in...");
+  statusEl.textContent = "Signing in...";
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: emailInput.value,
-    password: passwordInput.value
+    email,
+    password
   });
 
+  console.log("LOGIN:", data, error);
+
   if (error) {
-    log("Login failed: " + error.message);
+    statusEl.textContent = "Login failed: " + error.message;
     return;
   }
 
-  log("Checking profile...");
+  checkAdmin();
+});
 
-  const { data: profile, error: profileError } = await supabase
+// =====================
+// CHECK ADMIN ROLE
+// =====================
+async function checkAdmin() {
+  statusEl.textContent = "Checking admin access...";
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  console.log("USER:", user);
+
+  if (!user) {
+    statusEl.textContent = "No user found";
+    return;
+  }
+
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", data.user.id)
+    .eq("id", user.id)
     .single();
 
-  if (profileError) {
-    log("Profile error: " + profileError.message);
+  console.log("PROFILE:", profile, error);
+
+  if (error || !profile || profile.role !== "admin") {
+    statusEl.textContent = "Access denied (not admin)";
     return;
   }
 
-  if (profile.role !== "admin") {
-    log("Not admin");
-    return;
-  }
-
-  loginWrap.style.display = "none";
-  protectedWrap.style.display = "block";
+  // ✅ SHOW ADMIN PANEL
+  loginForm.style.display = "none";
+  adminPanel.style.display = "block";
 
   loadCases();
 }
 
+// =====================
+// LOAD CASES
+// =====================
 async function loadCases() {
-  statusEl.textContent = "Loading...";
+  statusEl.textContent = "Loading cases...";
 
   const { data, error } = await supabase
     .from("cases")
     .select("*")
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  console.log("CASES:", data, error);
 
   if (error) {
-    statusEl.textContent = error.message;
+    statusEl.textContent = "ERROR: " + error.message;
     return;
   }
 
   listEl.innerHTML = "";
 
-  data.forEach(item => {
+  if (!data || data.length === 0) {
+    statusEl.textContent = "No pending cases";
+    return;
+  }
+
+  data.forEach((item) => {
     const div = document.createElement("div");
+    div.className = "case";
 
     div.innerHTML = `
-      <h3>${item.title}</h3>
-      <p>${item.location}</p>
-      <p>${item.summary}</p>
+      <h3>${item.title || "No title"}</h3>
+      <p><strong>Location:</strong> ${item.location || "-"}</p>
+      <p><strong>Date:</strong> ${item.date_observed || "-"}</p>
+      <p>${item.summary || ""}</p>
       <button onclick="approve('${item.id}')">Approve</button>
       <button onclick="reject('${item.id}')">Reject</button>
       <hr>
@@ -88,21 +117,57 @@ async function loadCases() {
   statusEl.textContent = "";
 }
 
+// =====================
+// APPROVE
+// =====================
 async function approve(id) {
-  await supabase.from("cases").update({ status: "approved" }).eq("id", id);
+  statusEl.textContent = "Approving...";
+
+  const { error } = await supabase
+    .from("cases")
+    .update({ status: "approved" })
+    .eq("id", id);
+
+  console.log("APPROVE:", error);
+
+  if (error) {
+    statusEl.textContent = error.message;
+    return;
+  }
+
   loadCases();
 }
 
+// =====================
+// REJECT
+// =====================
 async function reject(id) {
-  await supabase.from("cases").update({ status: "rejected" }).eq("id", id);
+  statusEl.textContent = "Rejecting...";
+
+  const { error } = await supabase
+    .from("cases")
+    .update({ status: "rejected" })
+    .eq("id", id);
+
+  console.log("REJECT:", error);
+
+  if (error) {
+    statusEl.textContent = error.message;
+    return;
+  }
+
   loadCases();
 }
 
-async function signOut() {
-  await supabase.auth.signOut();
-  protectedWrap.style.display = "none";
-  loginWrap.style.display = "block";
-}
+// =====================
+// AUTO LOGIN (if already signed in)
+// =====================
+(async () => {
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
 
-loginBtn.onclick = signIn;
-signoutBtn.onclick = signOut;
+  if (session) {
+    checkAdmin();
+  }
+})();
