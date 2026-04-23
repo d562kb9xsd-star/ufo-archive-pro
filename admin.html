@@ -22,9 +22,23 @@
   <main class="container page-wrap">
     <div class="admin-card">
       <h1>Admin Review Queue</h1>
-      <p class="page-intro">Review pending submissions below.</p>
-      <div id="admin-status" class="status-message"></div>
-      <div id="admin-list" class="admin-list"></div>
+      <p class="page-intro">Enter the admin password to continue.</p>
+
+      <div id="admin-login">
+        <div class="form-grid">
+          <div>
+            <label for="admin-password">Admin password</label>
+            <input id="admin-password" type="password" placeholder="Enter password" />
+          </div>
+          <button id="admin-login-btn" class="btn btn-primary" type="button">Unlock admin</button>
+        </div>
+        <div id="admin-login-status" class="status-message"></div>
+      </div>
+
+      <div id="admin-protected" style="display:none;">
+        <div id="admin-status" class="status-message"></div>
+        <div id="admin-list" class="admin-list"></div>
+      </div>
     </div>
   </main>
 
