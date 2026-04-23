@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Review</title>
+  <title>Admin Review - UFO Archive Pro</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -28,7 +28,7 @@
         <div class="form-grid">
           <div>
             <label for="admin-email">Email</label>
-            <input id="admin-email" type="email" placeholder="you@example.com" />
+            <input id="admin-email" type="email" placeholder="Enter admin email" />
           </div>
 
           <div>
@@ -36,24 +36,25 @@
             <input id="admin-password" type="password" placeholder="Enter password" />
           </div>
 
-          <div class="admin-actions">
-            <button id="admin-login-btn" class="btn btn-primary" type="button">Sign in</button>
-            <button id="admin-logout-btn" class="btn btn-secondary" type="button" style="display:none;">Sign out</button>
-          </div>
+          <button id="admin-login-btn" class="btn btn-primary" type="button">Sign in</button>
         </div>
 
         <div id="admin-login-status" class="status-message"></div>
       </div>
 
       <div id="admin-protected" style="display:none;">
+        <div class="admin-actions" style="margin-bottom:16px;">
+          <button id="admin-signout-btn" class="btn btn-secondary" type="button">Sign out</button>
+        </div>
+
         <div id="admin-status" class="status-message"></div>
         <div id="admin-list" class="admin-list"></div>
       </div>
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="admin.js"></script>
 </body>
 </html>
