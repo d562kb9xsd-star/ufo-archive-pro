@@ -138,24 +138,6 @@ small {
   color: #ffffff;
 }
 
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 28px;
-  margin-top: 8px;
-}
-
-.stat strong {
-  display: block;
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.stat span {
-  color: #aab6d1;
-  font-size: 13px;
-}
-
 .hero-panel,
 .card,
 .case,
@@ -204,7 +186,8 @@ small {
   margin-bottom: 24px;
 }
 
-.archive-list {
+.archive-list,
+.admin-list {
   display: grid;
   gap: 16px;
 }
@@ -262,12 +245,6 @@ textarea {
   color: #dbe7ff;
 }
 
-.admin-list {
-  display: grid;
-  gap: 16px;
-  margin-top: 20px;
-}
-
 .admin-actions {
   display: flex;
   gap: 10px;
@@ -292,30 +269,5 @@ textarea {
 
   h1 {
     font-size: 42px;
-  }
-}
-
-@media (max-width: 640px) {
-  .container {
-    width: min(100% - 28px, 1200px);
-  }
-
-  .hero,
-  .form-card,
-  .admin-card {
-    padding: 24px;
-  }
-
-  .nav {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .menu {
-    justify-content: flex-start;
-  }
-
-  h1 {
-    font-size: 34px;
   }
 }
