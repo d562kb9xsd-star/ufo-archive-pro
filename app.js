@@ -37,6 +37,12 @@
       }
     });
 
+    if (!res.ok) {
+      const text = await res.text();
+      container.innerHTML = `<p style="color:red;">Error ${res.status}: ${escapeHtml(text)}</p>`;
+      return;
+    }
+
     const data = await res.json();
 
     if (!data || data.length === 0) {
@@ -57,8 +63,8 @@
       div.innerHTML = `
         <h3>${escapeHtml(item.title || "Untitled Case")}</h3>
         <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
-        <p>${escapeHtml(item.description || "")}</p>
-        <p>${tags}</p>
+        <p>${escapeHtml(item.description || item.summary || "")}</p>
+        ${tags ? `<p>${tags}</p>` : ""}
       `;
 
       container.appendChild(div);
