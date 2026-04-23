@@ -5,77 +5,48 @@ const supabase = window.supabase.createClient(
 
 const loginForm = document.getElementById("login-form");
 const adminPanel = document.getElementById("admin-panel");
-const listEl = document.getElementById("cases-list");
+const casesList = document.getElementById("cases-list");
 const statusEl = document.getElementById("status");
+const signoutBtn = document.getElementById("signout-btn");
 
-// =====================
-// LOGIN
-// =====================
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+function setStatus(message) {
+  if (statusEl) statusEl.textContent = message;
+  console.log(message);
+}
 
-  statusEl.textContent = "Signing in...";
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  console.log("LOGIN:", data, error);
-
-  if (error) {
-    statusEl.textContent = "Login failed: " + error.message;
-    return;
-  }
-
-  checkAdmin();
-});
-
-// =====================
-// CHECK ADMIN ROLE
-// =====================
-async function checkAdmin() {
-  statusEl.textContent = "Checking admin access...";
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  console.log("USER:", user);
-
-  if (!user) {
-    statusEl.textContent = "No user found";
-    return;
-  }
-
+async function checkAdmin(userId) {
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
   console.log("PROFILE:", profile, error);
 
-  if (error || !profile || profile.role !== "admin") {
-    statusEl.textContent = "Access denied (not admin)";
-    return;
+  if (error) {
+    setStatus("Profile error: " + error.message);
+    return false;
   }
 
-  // ✅ SHOW ADMIN PANEL
-  loginForm.style.display = "none";
-  adminPanel.style.display = "block";
+  if (!profile || profile.role !== "admin") {
+    setStatus("Access denied: not admin");
+    return false;
+  }
 
-  loadCases();
+  return true;
 }
 
-// =====================
-// LOAD CASES
-// =====================
 async function loadCases() {
-  statusEl.textContent = "Loading cases...";
+  setStatus("Loading cases...");
 
   const { data, error } = await supabase
     .from("cases")
@@ -86,14 +57,14 @@ async function loadCases() {
   console.log("CASES:", data, error);
 
   if (error) {
-    statusEl.textContent = "ERROR: " + error.message;
+    setStatus("Cases error: " + error.message);
     return;
   }
 
-  listEl.innerHTML = "";
+  casesList.innerHTML = "";
 
   if (!data || data.length === 0) {
-    statusEl.textContent = "No pending cases";
+    setStatus("No pending cases");
     return;
   }
 
@@ -102,26 +73,24 @@ async function loadCases() {
     div.className = "case";
 
     div.innerHTML = `
-      <h3>${item.title || "No title"}</h3>
-      <p><strong>Location:</strong> ${item.location || "-"}</p>
-      <p><strong>Date:</strong> ${item.date_observed || "-"}</p>
-      <p>${item.summary || ""}</p>
-      <button onclick="approve('${item.id}')">Approve</button>
-      <button onclick="reject('${item.id}')">Reject</button>
-      <hr>
+      <h3>${escapeHtml(item.title || "No title")}</h3>
+      <p><strong>Location:</strong> ${escapeHtml(item.location || "-")}</p>
+      <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "-")}</p>
+      <p>${escapeHtml(item.summary || "")}</p>
+      <div class="admin-actions">
+        <button class="btn btn-primary" data-action="approve" data-id="${item.id}">Approve</button>
+        <button class="btn btn-secondary" data-action="reject" data-id="${item.id}">Reject</button>
+      </div>
     `;
 
-    listEl.appendChild(div);
+    casesList.appendChild(div);
   });
 
-  statusEl.textContent = "";
+  setStatus("");
 }
 
-// =====================
-// APPROVE
-// =====================
 async function approve(id) {
-  statusEl.textContent = "Approving...";
+  setStatus("Approving...");
 
   const { error } = await supabase
     .from("cases")
@@ -131,18 +100,15 @@ async function approve(id) {
   console.log("APPROVE:", error);
 
   if (error) {
-    statusEl.textContent = error.message;
+    setStatus("Approve error: " + error.message);
     return;
   }
 
-  loadCases();
+  await loadCases();
 }
 
-// =====================
-// REJECT
-// =====================
 async function reject(id) {
-  statusEl.textContent = "Rejecting...";
+  setStatus("Rejecting...");
 
   const { error } = await supabase
     .from("cases")
@@ -152,22 +118,90 @@ async function reject(id) {
   console.log("REJECT:", error);
 
   if (error) {
-    statusEl.textContent = error.message;
+    setStatus("Reject error: " + error.message);
     return;
   }
 
-  loadCases();
+  await loadCases();
 }
 
-// =====================
-// AUTO LOGIN (if already signed in)
-// =====================
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    setStatus("Enter email and password");
+    return;
+  }
+
+  setStatus("Signing in...");
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  console.log("LOGIN:", data, error);
+
+  if (error) {
+    setStatus("Login failed: " + error.message);
+    return;
+  }
+
+  if (!data.user) {
+    setStatus("No user returned");
+    return;
+  }
+
+  setStatus("Checking admin access...");
+
+  const isAdmin = await checkAdmin(data.user.id);
+  if (!isAdmin) {
+    return;
+  }
+
+  loginForm.style.display = "none";
+  adminPanel.style.display = "block";
+  await loadCases();
+});
+
+casesList.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+
+  if (action === "approve") {
+    await approve(id);
+  } else if (action === "reject") {
+    await reject(id);
+  }
+});
+
+signoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  adminPanel.style.display = "none";
+  loginForm.style.display = "grid";
+  casesList.innerHTML = "";
+  setStatus("Signed out");
+});
+
 (async () => {
   const {
     data: { session }
   } = await supabase.auth.getSession();
 
-  if (session) {
-    checkAdmin();
-  }
+  console.log("SESSION:", session);
+
+  if (!session || !session.user) return;
+
+  const isAdmin = await checkAdmin(session.user.id);
+  if (!isAdmin) return;
+
+  loginForm.style.display = "none";
+  adminPanel.style.display = "block";
+  await loadCases();
 })();
