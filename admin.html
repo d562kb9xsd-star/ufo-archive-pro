@@ -22,16 +22,26 @@
   <main class="container page-wrap">
     <div class="admin-card">
       <h1>Admin Review Queue</h1>
-      <p class="page-intro">Enter the admin password to continue.</p>
+      <p class="page-intro">Sign in with your admin email and password.</p>
 
       <div id="admin-login">
         <div class="form-grid">
           <div>
-            <label for="admin-password">Admin password</label>
+            <label for="admin-email">Email</label>
+            <input id="admin-email" type="email" placeholder="you@example.com" />
+          </div>
+
+          <div>
+            <label for="admin-password">Password</label>
             <input id="admin-password" type="password" placeholder="Enter password" />
           </div>
-          <button id="admin-login-btn" class="btn btn-primary" type="button">Unlock admin</button>
+
+          <div class="admin-actions">
+            <button id="admin-login-btn" class="btn btn-primary" type="button">Sign in</button>
+            <button id="admin-logout-btn" class="btn btn-secondary" type="button" style="display:none;">Sign out</button>
+          </div>
         </div>
+
         <div id="admin-login-status" class="status-message"></div>
       </div>
 
@@ -42,6 +52,7 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="admin.js"></script>
 </body>
