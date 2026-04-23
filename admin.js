@@ -1,8 +1,13 @@
-(async () => {
+(() => {
+  const ADMIN_PASSWORD = "ufocasesadmin";
+
+  const loginWrap = document.getElementById("admin-login");
+  const protectedWrap = document.getElementById("admin-protected");
+  const passwordInput = document.getElementById("admin-password");
+  const loginBtn = document.getElementById("admin-login-btn");
+  const loginStatus = document.getElementById("admin-login-status");
   const listEl = document.getElementById("admin-list");
   const statusEl = document.getElementById("admin-status");
-
-  if (!listEl) return;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -14,6 +19,8 @@
   }
 
   async function loadPending() {
+    if (!listEl || !statusEl) return;
+
     statusEl.textContent = "Loading pending cases...";
     listEl.innerHTML = "";
 
@@ -49,6 +56,7 @@
         card.innerHTML = `
           <h3>${escapeHtml(item.title || "Untitled")}</h3>
           <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
+          <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "Unknown")}</p>
           <p>${escapeHtml(item.summary || item.description || "")}</p>
           <div class="admin-actions">
             <button class="btn btn-primary" data-action="approve" data-id="${item.id}">Approve</button>
@@ -95,19 +103,43 @@
     }
   }
 
-  listEl.addEventListener("click", async (event) => {
-    const button = event.target.closest("button[data-action]");
-    if (!button) return;
+  if (listEl) {
+    listEl.addEventListener("click", async (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
 
-    const action = button.dataset.action;
-    const id = button.dataset.id;
+      const action = button.dataset.action;
+      const id = button.dataset.id;
 
-    if (action === "approve") {
-      await updateCase(id, "approved");
-    } else if (action === "reject") {
-      await updateCase(id, "rejected");
+      if (action === "approve") {
+        await updateCase(id, "approved");
+      } else if (action === "reject") {
+        await updateCase(id, "rejected");
+      }
+    });
+  }
+
+  function unlockAdmin() {
+    const entered = passwordInput.value.trim();
+
+    if (entered !== ADMIN_PASSWORD) {
+      loginStatus.textContent = "Incorrect password.";
+      return;
     }
-  });
 
-  await loadPending();
+    loginStatus.textContent = "";
+    loginWrap.style.display = "none";
+    protectedWrap.style.display = "block";
+    loadPending();
+  }
+
+  if (loginBtn) {
+    loginBtn.addEventListener("click", unlockAdmin);
+  }
+
+  if (passwordInput) {
+    passwordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") unlockAdmin();
+    });
+  }
 })();
