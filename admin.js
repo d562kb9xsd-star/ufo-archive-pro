@@ -26,44 +26,39 @@ async function loadPending() {
   statusEl.textContent = "Loading pending cases...";
   listEl.innerHTML = "";
 
-  try {
-    const { data, error } = await supabase
-      .from("cases")
-      .select("*")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("cases")
+    .select("*")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      statusEl.textContent = `Error loading cases: ${error.message}`;
-      return;
-    }
-
-    statusEl.textContent = "";
-
-    if (!data || data.length === 0) {
-      listEl.innerHTML = "<p>No pending cases.</p>";
-      return;
-    }
-
-    data.forEach((item) => {
-      const card = document.createElement("div");
-      card.className = "case";
-      card.innerHTML = `
-        <h3>${escapeHtml(item.title || "Untitled")}</h3>
-        <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
-        <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "Unknown")}</p>
-        <p>${escapeHtml(item.summary || "")}</p>
-        <div class="admin-actions">
-          <button class="btn btn-primary" data-action="approve" data-id="${item.id}">Approve</button>
-          <button class="btn btn-secondary" data-action="reject" data-id="${item.id}">Reject</button>
-        </div>
-      `;
-      listEl.appendChild(card);
-    });
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "Error loading pending cases.";
+  if (error) {
+    statusEl.textContent = "Error loading cases: " + error.message;
+    return;
   }
+
+  statusEl.textContent = "";
+
+  if (!data || data.length === 0) {
+    listEl.innerHTML = "<p>No pending cases.</p>";
+    return;
+  }
+
+  data.forEach((item) => {
+    const card = document.createElement("div");
+    card.className = "case";
+    card.innerHTML = `
+      <h3>${escapeHtml(item.title || "Untitled")}</h3>
+      <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
+      <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "Unknown")}</p>
+      <p>${escapeHtml(item.summary || "")}</p>
+      <div class="admin-actions">
+        <button class="btn btn-primary" data-action="approve" data-id="${item.id}">Approve</button>
+        <button class="btn btn-secondary" data-action="reject" data-id="${item.id}">Reject</button>
+      </div>
+    `;
+    listEl.appendChild(card);
+  });
 }
 
 async function updateCase(id, newStatus) {
@@ -75,7 +70,7 @@ async function updateCase(id, newStatus) {
     .eq("id", id);
 
   if (error) {
-    statusEl.textContent = `Update failed: ${error.message}`;
+    statusEl.textContent = "Update failed: " + error.message;
     return;
   }
 
@@ -84,10 +79,10 @@ async function updateCase(id, newStatus) {
 }
 
 async function signIn(email, password) {
-  try {
-    loginStatus.textContent = "Signing in...";
-    loginBtn.disabled = true;
+  loginStatus.textContent = "Signing in...";
+  loginBtn.disabled = true;
 
+  try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -98,18 +93,17 @@ async function signIn(email, password) {
       return;
     }
 
-    const user = data?.user;
-    if (!user) {
+    if (!data.user) {
       loginStatus.textContent = "No user returned.";
       return;
     }
 
-    loginStatus.textContent = "Checking admin access...";
+    loginStatus.textContent = "Checking admin profile...";
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
+      .eq("id", data.user.id)
       .single();
 
     if (profileError) {
@@ -123,51 +117,46 @@ async function signIn(email, password) {
       return;
     }
 
-    loginStatus.textContent = "";
+    loginStatus.textContent = "Success.";
     loginWrap.style.display = "none";
     protectedWrap.style.display = "block";
     await loadPending();
   } catch (err) {
     console.error(err);
-    loginStatus.textContent = "Unexpected sign-in error.";
+    loginStatus.textContent = "Unexpected error during sign-in.";
   } finally {
     loginBtn.disabled = false;
   }
 }
 
 async function checkSession() {
-  try {
-    const { data, error } = await supabase.auth.getSession();
+  const { data, error } = await supabase.auth.getSession();
 
-    if (error || !data.session) {
-      loginWrap.style.display = "block";
-      protectedWrap.style.display = "none";
-      return;
-    }
-
-    const user = data.session.user;
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile || profile.role !== "admin") {
-      await supabase.auth.signOut();
-      loginWrap.style.display = "block";
-      protectedWrap.style.display = "none";
-      loginStatus.textContent = "Not authorised.";
-      return;
-    }
-
-    loginWrap.style.display = "none";
-    protectedWrap.style.display = "block";
-    await loadPending();
-  } catch (err) {
-    console.error(err);
-    loginStatus.textContent = "Session check failed.";
+  if (error || !data.session) {
+    loginWrap.style.display = "block";
+    protectedWrap.style.display = "none";
+    return;
   }
+
+  const user = data.session.user;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile || profile.role !== "admin") {
+    await supabase.auth.signOut();
+    loginWrap.style.display = "block";
+    protectedWrap.style.display = "none";
+    loginStatus.textContent = "Not authorised.";
+    return;
+  }
+
+  loginWrap.style.display = "none";
+  protectedWrap.style.display = "block";
+  await loadPending();
 }
 
 async function signOut() {
