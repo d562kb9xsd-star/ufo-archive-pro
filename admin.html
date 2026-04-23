@@ -1,60 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Review - UFO Archive Pro</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Admin - UFO Archive</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <div class="brand">UFO Archive Pro</div>
-      <nav class="menu">
-        <a href="index.html">Home</a>
-        <a href="archive.html">Archive</a>
-        <a href="submit.html">Submit</a>
-        <a href="admin.html">Admin</a>
-      </nav>
-    </div>
-  </header>
 
-  <main class="container page-wrap">
-    <div class="admin-card">
-      <h1>Admin Review Queue</h1>
-      <p class="page-intro">Sign in with your admin email and password.</p>
+<h1>Admin Review Queue</h1>
 
-      <div id="admin-login">
-        <div class="form-grid">
-          <div>
-            <label for="admin-email">Email</label>
-            <input id="admin-email" type="email" placeholder="Enter admin email" />
-          </div>
+<div id="admin-login">
+  <input id="admin-email" placeholder="Email"><br><br>
+  <input id="admin-password" type="password" placeholder="Password"><br><br>
+  <button id="admin-login-btn">Sign in</button>
+  <p id="admin-login-status"></p>
+</div>
 
-          <div>
-            <label for="admin-password">Password</label>
-            <input id="admin-password" type="password" placeholder="Enter password" />
-          </div>
+<div id="admin-protected" style="display:none;">
+  <button id="admin-signout-btn">Sign out</button>
+  <h2>Pending Reports</h2>
+  <div id="admin-list"></div>
+  <p id="admin-status"></p>
+</div>
 
-          <button id="admin-login-btn" class="btn btn-primary" type="button">Sign in</button>
-        </div>
+<script src="config.js?v=5"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin.js?v=5"></script>
 
-        <div id="admin-login-status" class="status-message"></div>
-      </div>
-
-      <div id="admin-protected" style="display:none;">
-        <div class="admin-actions" style="margin-bottom:16px;">
-          <button id="admin-signout-btn" class="btn btn-secondary" type="button">Sign out</button>
-        </div>
-
-        <div id="admin-status" class="status-message"></div>
-        <div id="admin-list" class="admin-list"></div>
-      </div>
-    </div>
-  </main>
-
-  <script src="config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="admin.js"></script>
 </body>
 </html>
