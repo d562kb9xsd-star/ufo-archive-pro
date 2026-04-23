@@ -1,4 +1,4 @@
-const ADMIN_PASSWORD = "MyUfoAdmin2026!";
+const ADMIN_PASSWORD = "ufocases123";
 
 const loginArea = document.getElementById("loginArea");
 const adminArea = document.getElementById("adminArea");
@@ -25,17 +25,16 @@ function showAdmin() {
 
 function showLogin() {
   adminArea.style.display = "none";
-  loginArea.style.display = "block";
+  loginArea.style.display = "grid";
 }
 
-async function loadPendingCases() {
+async function loadCases() {
   statusEl.textContent = "Loading reports...";
   casesEl.innerHTML = "";
 
   try {
     const url =
-      `${window.UFO_APP_CONFIG.supabaseUrl}/rest/v1/cases` +
-      `?select=*&order=created_at.desc`;
+      `${window.UFO_APP_CONFIG.supabaseUrl}/rest/v1/cases?select=*&order=created_at.desc`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -62,7 +61,7 @@ async function loadPendingCases() {
 
     data.forEach((item) => {
       const card = document.createElement("div");
-      card.className = "card";
+      card.className = "case";
 
       card.innerHTML = `
         <h3>${escapeHtml(item.title || "Untitled")}</h3>
@@ -70,10 +69,10 @@ async function loadPendingCases() {
         <p><strong>Location:</strong> ${escapeHtml(item.location || "-")}</p>
         <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "-")}</p>
         <p>${escapeHtml(item.summary || "")}</p>
-        <div class="actions">
-          <button type="button" data-action="approve" data-id="${item.id}">Approve</button>
-          <button type="button" class="secondary" data-action="reject" data-id="${item.id}">Reject</button>
-          <button type="button" class="danger" data-action="delete" data-id="${item.id}">Delete</button>
+        <div class="admin-actions">
+          <button type="button" class="btn btn-primary" data-action="approve" data-id="${item.id}">Approve</button>
+          <button type="button" class="btn btn-secondary" data-action="reject" data-id="${item.id}">Reject</button>
+          <button type="button" class="btn btn-secondary" data-action="delete" data-id="${item.id}">Delete</button>
         </div>
       `;
 
@@ -108,7 +107,7 @@ async function updateCaseStatus(id, newStatus) {
       return;
     }
 
-    await loadPendingCases();
+    await loadCases();
   } catch (error) {
     console.error(error);
     statusEl.textContent = "Unexpected update error.";
@@ -136,7 +135,7 @@ async function deleteCase(id) {
       return;
     }
 
-    await loadPendingCases();
+    await loadCases();
   } catch (error) {
     console.error(error);
     statusEl.textContent = "Unexpected delete error.";
@@ -154,7 +153,7 @@ function unlockAdmin() {
   sessionStorage.setItem("ufo_admin_unlocked", "yes");
   loginStatus.textContent = "";
   showAdmin();
-  loadPendingCases();
+  loadCases();
 }
 
 function lockAdmin() {
@@ -200,7 +199,7 @@ casesEl.addEventListener("click", async (event) => {
 
 if (sessionStorage.getItem("ufo_admin_unlocked") === "yes") {
   showAdmin();
-  loadPendingCases();
+  loadCases();
 } else {
   showLogin();
 }
