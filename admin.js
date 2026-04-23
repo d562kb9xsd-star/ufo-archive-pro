@@ -1,3 +1,4 @@
+alert("NEW ADMIN JS LOADED");
 const supabase = window.supabase.createClient(
   window.UFO_APP_CONFIG.supabaseUrl,
   window.UFO_APP_CONFIG.supabaseAnonKey
