@@ -3,109 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Submit a Case · UFO Archive Pro</title>
+  <title>Submit a UFO Report</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="page-alt">
-  <header class="site-header">
-    <div class="container site-header-inner">
-      <a href="index.html" class="brand">
-        <span class="brand-mark">🛸</span>
-        <span data-site-name>UFO Archive Pro</span>
-      </a>
-
-      <nav class="nav">
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">UFO Archive Pro</div>
+      <nav class="menu">
         <a href="index.html">Home</a>
         <a href="archive.html">Archive</a>
-        <a href="submit.html" class="active">Submit</a>
+        <a href="submit.html">Submit</a>
         <a href="admin.html">Admin</a>
       </nav>
     </div>
   </header>
 
-  <main class="page-shell">
-    <div class="container">
-      <section class="glass page-hero">
-        <div class="eyebrow">Public submission</div>
-        <h1>Submit a UFO sighting or case study</h1>
-        <p class="lead">Add a title, type, date, location, summary, evidence, and written account. New cases enter the moderation queue as pending.</p>
-      </section>
+  <main class="container page-wrap">
+    <div class="form-card">
+      <h1>Submit a UFO Report</h1>
+      <p class="page-intro">New submissions are saved as pending until reviewed.</p>
 
-      <section class="section">
-        <form id="submit-form" class="glass form-card">
-          <div class="form-grid">
-            <label>
-              Title
-              <input type="text" name="title" required placeholder="Bright object above Southampton" />
-            </label>
+      <form id="submit-form" class="form-grid">
+        <div>
+          <label for="title">Title</label>
+          <input id="title" name="title" required />
+        </div>
 
-            <label>
-              Type
-              <select name="type" required>
-                <option value="image">Image</option>
-                <option value="video">Video</option>
-                <option value="document">Document</option>
-                <option value="report">Report</option>
-              </select>
-            </label>
+        <div>
+          <label for="location">Location</label>
+          <input id="location" name="location" required />
+        </div>
 
-            <label>
-              Date observed
-              <input type="date" name="date_observed" />
-            </label>
+        <div>
+          <label for="date_observed">Date observed</label>
+          <input id="date_observed" name="date_observed" type="date" />
+        </div>
 
-            <label>
-              Location
-              <input type="text" name="location" placeholder="Southampton, UK" />
-            </label>
+        <div>
+          <label for="tags">Tags (comma separated)</label>
+          <input id="tags" name="tags" placeholder="orb, triangle, night sky" />
+        </div>
 
-            <label class="full">
-              Short summary
-              <textarea name="summary" placeholder="What happened?" required></textarea>
-            </label>
+        <div>
+          <label for="summary">Summary</label>
+          <textarea id="summary" name="summary" required></textarea>
+        </div>
 
-            <label class="full">
-              Description
-              <textarea name="description" placeholder="Movement, sound, duration, weather, nearby objects, direction of travel..."></textarea>
-            </label>
+        <button class="btn btn-primary" type="submit">Submit report</button>
+      </form>
 
-            <label class="full">
-              Case study / witness report
-              <textarea name="case_study" placeholder="Longer written witness account"></textarea>
-            </label>
-
-            <label>
-              Tags
-              <input type="text" name="tags" placeholder="triangle, silent, bright" />
-            </label>
-
-            <label>
-              Your email
-              <input type="email" name="submitter_email" placeholder="name@example.com" />
-            </label>
-
-            <label class="full">
-              Upload media
-              <input type="file" name="media" />
-            </label>
-          </div>
-
-          <div class="hero-actions">
-            <button type="submit" class="button button-primary">Submit case</button>
-          </div>
-
-          <div id="submit-notice" class="notice" style="display:block;"></div>
-        </form>
-      </section>
-    </div>
-
-    <div class="container footer">
-      New submissions are saved as pending until reviewed by an admin.
+      <div id="submit-status" class="status-message"></div>
     </div>
   </main>
 
   <script src="config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="submit.js"></script>
 </body>
 </html>
