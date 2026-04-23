@@ -1,4 +1,4 @@
-const ADMIN_PASSWORD = "MyUfoAdmin2026!";
+const ADMIN_PASSWORD = "ufocases123";
 
 const loginArea = document.getElementById("loginArea");
 const adminArea = document.getElementById("adminArea");
@@ -29,13 +29,13 @@ function showLogin() {
 }
 
 async function loadPendingCases() {
-  statusEl.textContent = "Loading pending cases...";
+  statusEl.textContent = "Loading reports...";
   casesEl.innerHTML = "";
 
   try {
     const url =
       `${window.UFO_APP_CONFIG.supabaseUrl}/rest/v1/cases` +
-      `?select=*&status=eq.pending&order=created_at.desc`;
+      `?select=*&order=created_at.desc`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -47,14 +47,14 @@ async function loadPendingCases() {
 
     if (!response.ok) {
       const text = await response.text();
-      statusEl.textContent = "Error loading cases: " + text;
+      statusEl.textContent = "Error loading reports: " + text;
       return;
     }
 
     const data = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
-      statusEl.textContent = "No pending cases.";
+      statusEl.textContent = "No reports found.";
       return;
     }
 
@@ -63,21 +63,25 @@ async function loadPendingCases() {
     data.forEach((item) => {
       const card = document.createElement("div");
       card.className = "card";
+
       card.innerHTML = `
         <h3>${escapeHtml(item.title || "Untitled")}</h3>
+        <p><strong>Status:</strong> ${escapeHtml(item.status || "unknown")}</p>
         <p><strong>Location:</strong> ${escapeHtml(item.location || "-")}</p>
         <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "-")}</p>
         <p>${escapeHtml(item.summary || "")}</p>
         <div class="actions">
           <button type="button" data-action="approve" data-id="${item.id}">Approve</button>
           <button type="button" class="secondary" data-action="reject" data-id="${item.id}">Reject</button>
+          <button type="button" class="danger" data-action="delete" data-id="${item.id}">Delete</button>
         </div>
       `;
+
       casesEl.appendChild(card);
     });
   } catch (error) {
     console.error(error);
-    statusEl.textContent = "Unexpected error loading cases.";
+    statusEl.textContent = "Unexpected error loading reports.";
   }
 }
 
@@ -108,6 +112,34 @@ async function updateCaseStatus(id, newStatus) {
   } catch (error) {
     console.error(error);
     statusEl.textContent = "Unexpected update error.";
+  }
+}
+
+async function deleteCase(id) {
+  statusEl.textContent = "Deleting case...";
+
+  try {
+    const url = `${window.UFO_APP_CONFIG.supabaseUrl}/rest/v1/cases?id=eq.${encodeURIComponent(id)}`;
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
+        Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
+        Prefer: "return=minimal"
+      }
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      statusEl.textContent = "Delete failed: " + text;
+      return;
+    }
+
+    await loadPendingCases();
+  } catch (error) {
+    console.error(error);
+    statusEl.textContent = "Unexpected delete error.";
   }
 }
 
@@ -157,6 +189,12 @@ casesEl.addEventListener("click", async (event) => {
 
   if (action === "reject") {
     await updateCaseStatus(id, "rejected");
+  }
+
+  if (action === "delete") {
+    const ok = confirm("Delete this report permanently?");
+    if (!ok) return;
+    await deleteCase(id);
   }
 });
 
