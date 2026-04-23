@@ -1,5 +1,5 @@
 (() => {
-  const ADMIN_PASSWORD = "ufocasesadmin";
+  const ADMIN_PASSWORD = "MyUfoAdmin2026!";
 
   const loginWrap = document.getElementById("admin-login");
   const protectedWrap = document.getElementById("admin-protected");
