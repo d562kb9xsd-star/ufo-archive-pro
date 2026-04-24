@@ -37,10 +37,15 @@
       cursor: pointer;
       background: #4f7cff;
       color: white;
+      margin-right: 8px;
     }
 
     .secondary {
       background: #444;
+    }
+
+    .danger {
+      background: #c0392b;
     }
 
     .case {
@@ -68,35 +73,24 @@
 </head>
 
 <body>
-
   <div class="container">
     <h1>Admin Review Queue</h1>
 
-    <!-- LOGIN -->
     <div id="admin-login">
       <label for="admin-password">Admin password</label>
       <input id="admin-password" type="password" placeholder="Enter password" />
-
       <button id="admin-login-btn">Unlock admin</button>
-
       <div id="admin-login-status"></div>
     </div>
 
-    <!-- ADMIN PANEL -->
     <div id="admin-protected">
       <button id="admin-signout-btn" class="secondary">Lock admin</button>
-
       <div id="admin-status"></div>
-
       <div id="admin-list"></div>
     </div>
   </div>
 
-  <!-- CONFIG -->
-  <script src="config.js?v=99"></script>
-
-  <!-- ADMIN SCRIPT (IMPORTANT VERSION PARAM) -->
-  <script src="admin.js?v=99"></script>
-
+  <script src="config.js?v=1000"></script>
+  <script src="admin.js?v=1000"></script>
 </body>
 </html>
