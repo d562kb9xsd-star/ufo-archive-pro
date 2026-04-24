@@ -1,54 +1,88 @@
-(() => {
-  const form = document.getElementById("submit-form");
-  const statusEl = document.getElementById("submit-status");
+const form = document.getElementById("submit-form");
+const statusEl = document.getElementById("submit-status");
 
-  if (!form) return;
+const supabaseClient = supabase.createClient(
+  window.UFO_APP_CONFIG.supabaseUrl,
+  window.UFO_APP_CONFIG.supabaseAnonKey
+);
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    statusEl.textContent = "Submitting report...";
+function safeFileName(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9.\-_]/g, "-")
+    .replace(/-+/g, "-");
+}
 
-    const formData = new FormData(form);
-    const tags = String(formData.get("tags") || "")
-      .split(",")
-      .map(t => t.trim())
-      .filter(Boolean);
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-    const payload = {
-      title: String(formData.get("title") || "").trim(),
-      location: String(formData.get("location") || "").trim(),
-      date_observed: formData.get("date_observed") || null,
-      summary: String(formData.get("summary") || "").trim(),
-      description: String(formData.get("summary") || "").trim(),
-      tags,
-      status: "pending"
-    };
+  statusEl.textContent = "Submitting report...";
 
-    try {
-      const url = window.UFO_APP_CONFIG.supabaseUrl + "/rest/v1/cases";
+  const formData = new FormData(form);
+  const file = document.getElementById("media").files[0];
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
-          Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
-          "Content-Type": "application/json",
-          Prefer: "return=representation"
-        },
-        body: JSON.stringify(payload)
-      });
+  let mediaUrl = null;
+  let mediaPath = null;
+  let mediaType = null;
 
-      if (!res.ok) {
-        const text = await res.text();
-        statusEl.textContent = `Submission failed: ${text}`;
+  try {
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) {
+        statusEl.textContent = "File is too large. Maximum size is 50MB.";
         return;
       }
 
-      form.reset();
-      statusEl.textContent = "Report submitted successfully. It is now pending review.";
-    } catch (error) {
-      console.error(error);
-      statusEl.textContent = "Error submitting report.";
+      const timestamp = Date.now();
+      const filename = `${timestamp}-${safeFileName(file.name)}`;
+      mediaPath = `submissions/${filename}`;
+      mediaType = file.type;
+
+      statusEl.textContent = "Uploading media...";
+
+      const uploadResult = await supabaseClient.storage
+        .from("ufo-media")
+        .upload(mediaPath, file, {
+          cacheControl: "3600",
+          upsert: false
+        });
+
+      if (uploadResult.error) {
+        throw uploadResult.error;
+      }
+
+      const publicUrlResult = supabaseClient.storage
+        .from("ufo-media")
+        .getPublicUrl(mediaPath);
+
+      mediaUrl = publicUrlResult.data.publicUrl;
     }
-  });
-})();
+
+    statusEl.textContent = "Saving report...";
+
+    const report = {
+      title: formData.get("title"),
+      location: formData.get("location"),
+      date_observed: formData.get("date_observed"),
+      tags: formData.get("tags"),
+      summary: formData.get("summary"),
+      status: "pending",
+      media_url: mediaUrl,
+      media_path: mediaPath,
+      media_type: mediaType
+    };
+
+    const { error } = await supabaseClient
+      .from("cases")
+      .insert([report]);
+
+    if (error) {
+      throw error;
+    }
+
+    form.reset();
+    statusEl.textContent = "Report submitted successfully. It is now pending review.";
+  } catch (error) {
+    console.error(error);
+    statusEl.textContent = "Submission failed: " + error.message;
+  }
+});
