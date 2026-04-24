@@ -3,16 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Report a UFO Sighting | Submit Photos, Videos and Case Details</title>
-  <meta name="description" content="Submit a UFO sighting with location, date, summary and supporting evidence such as photos or videos." />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://ufocases.co.uk/submit.html" />
 
-  <meta property="og:title" content="Report a UFO Sighting | Submit Photos, Videos and Case Details" />
-  <meta property="og:description" content="Submit your UFO sighting for review with date, location and summary details." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://ufocases.co.uk/submit.html" />
-  <meta property="og:site_name" content="UFO Archive Pro" />
+  <title>Report a UFO Sighting | Submit UFO Case UK</title>
+  <meta name="description" content="Seen something unexplained? Submit your UFO sighting with photos, videos, and details for review." />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -30,46 +23,51 @@
   </header>
 
   <main class="container page-wrap">
-    <div class="form-card">
+    <section class="hero-card">
       <h1>Submit a UFO Report</h1>
-      <p class="page-intro">
-        Share the details of your sighting. Reports are submitted for review before they appear publicly.
-      </p>
+      <p>New submissions are saved as pending until reviewed.</p>
 
       <form id="submit-form" class="form-grid">
         <div>
           <label for="title">Title</label>
-          <input id="title" name="title" required />
+          <input id="title" name="title" type="text" required />
         </div>
 
         <div>
           <label for="location">Location</label>
-          <input id="location" name="location" required />
+          <input id="location" name="location" type="text" required />
         </div>
 
         <div>
           <label for="date_observed">Date observed</label>
-          <input id="date_observed" name="date_observed" type="date" />
+          <input id="date_observed" name="date_observed" type="date" required />
         </div>
 
         <div>
           <label for="tags">Tags (comma separated)</label>
-          <input id="tags" name="tags" placeholder="orb, triangle, night sky" />
+          <input id="tags" name="tags" type="text" placeholder="orb, triangle, night sky" />
         </div>
 
         <div>
           <label for="summary">Summary</label>
-          <textarea id="summary" name="summary" required></textarea>
+          <textarea id="summary" name="summary" rows="5" required></textarea>
+        </div>
+
+        <div>
+          <label for="media">Upload picture or video</label>
+          <input id="media" name="media" type="file" accept="image/*,video/*" />
+          <p style="font-size: 14px; opacity: 0.75;">Max file size: 50MB</p>
         </div>
 
         <button class="btn btn-primary" type="submit">Submit report</button>
       </form>
 
-      <div id="submit-status" class="status-message"></div>
-    </div>
+      <p id="submit-status" class="status-message"></p>
+    </section>
   </main>
 
-  <script src="config.js?v=50"></script>
-  <script src="submit.js?v=50"></script>
+  <script src="config.js?v=40"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="submit.js?v=40"></script>
 </body>
 </html>
