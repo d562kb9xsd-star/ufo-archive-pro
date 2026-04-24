@@ -1,73 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Report a UFO Sighting | Submit UFO Case UK</title>
-  <meta name="description" content="Seen something unexplained? Submit your UFO sighting with photos, videos, and details for review." />
+<title>Report a UFO Sighting UK | Submit Photos & Videos</title>
 
-  <link rel="stylesheet" href="styles.css" />
+<meta name="description" content="Report a UFO sighting in the UK. Submit your UFO encounter with photos, videos, location, date and witness details." />
+<meta name="keywords" content="report UFO UK, submit UFO sighting, UFO evidence UK" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://www.ufocases.co.uk/submit.html" />
+
+<link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-  <header>
-    <div class="container nav">
-      <div class="brand">UFO Archive Pro</div>
-      <nav class="menu">
-        <a href="index.html">Home</a>
-        <a href="archive.html">Archive</a>
-        <a href="submit.html">Submit</a>
-        <a href="admin.html">Admin</a>
-      </nav>
-    </div>
-  </header>
 
-  <main class="container page-wrap">
-    <section class="hero-card">
-      <h1>Submit a UFO Report</h1>
-      <p>New submissions are saved as pending until reviewed.</p>
+<header>
+  <div class="container nav">
+    <div class="brand">UFO Archive Pro</div>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="archive.html">Archive</a>
+    </nav>
+  </div>
+</header>
 
-      <form id="submit-form" class="form-grid">
-        <div>
-          <label for="title">Title</label>
-          <input id="title" name="title" type="text" required />
-        </div>
+<main class="container page-wrap">
 
-        <div>
-          <label for="location">Location</label>
-          <input id="location" name="location" type="text" required />
-        </div>
+<h1>Submit a UFO Report</h1>
 
-        <div>
-          <label for="date_observed">Date observed</label>
-          <input id="date_observed" name="date_observed" type="date" required />
-        </div>
+<form id="report-form">
 
-        <div>
-          <label for="tags">Tags (comma separated)</label>
-          <input id="tags" name="tags" type="text" placeholder="orb, triangle, night sky" />
-        </div>
+<input type="text" id="title" placeholder="Title" required />
+<input type="text" id="location" placeholder="Location" required />
+<input type="date" id="date" required />
 
-        <div>
-          <label for="summary">Summary</label>
-          <textarea id="summary" name="summary" rows="5" required></textarea>
-        </div>
+<textarea id="description" placeholder="Describe what you saw" required></textarea>
 
-        <div>
-          <label for="media">Upload picture or video</label>
-          <input id="media" name="media" type="file" accept="image/*,video/*" />
-          <p style="font-size: 14px; opacity: 0.75;">Max file size: 50MB</p>
-        </div>
+<input type="file" id="media" accept="image/*,video/*" />
 
-        <button class="btn btn-primary" type="submit">Submit report</button>
-      </form>
+<button type="submit">Submit Report</button>
 
-      <p id="submit-status" class="status-message"></p>
-    </section>
-  </main>
+</form>
 
-  <script src="config.js?v=40"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="submit.js?v=40"></script>
+</main>
+
+<script src="config.js?v=2001"></script>
+<script src="submit.js?v=2001"></script>
+
 </body>
 </html>
