@@ -1,36 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - UFO Archive Pro</title>
-  <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container page-wrap">
+  <header>
+    <div class="container nav">
+      <div class="brand">UFO Archive Pro</div>
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="archive.html">Archive</a>
+        <a href="submit.html">Submit</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page-wrap">
     <div class="admin-card">
       <h1>Admin Review Queue</h1>
       <p class="page-intro">Enter the admin password to review reports.</p>
 
-      <div id="loginArea" class="form-grid">
+      <div id="admin-login" class="form-grid">
         <div>
-          <label for="adminPassword">Admin password</label>
-          <input id="adminPassword" type="password" placeholder="Enter admin password">
+          <label for="admin-password">Admin password</label>
+          <input id="admin-password" type="password" placeholder="Enter password" />
         </div>
-        <button id="loginBtn" class="btn btn-primary" type="button">Unlock admin</button>
-        <div id="loginStatus" class="status-message"></div>
+        <button id="admin-login-btn" class="btn btn-primary" type="button">Unlock admin</button>
       </div>
 
-      <div id="adminArea" style="display:none;">
+      <p id="admin-login-status" class="status-message"></p>
+
+      <div id="admin-protected" style="display:none;">
         <div class="admin-actions" style="margin-bottom:16px;">
-          <button id="lockBtn" class="btn btn-secondary" type="button">Lock admin</button>
+          <button id="admin-signout-btn" class="btn btn-secondary" type="button">Lock admin</button>
         </div>
-        <div id="status" class="status-message"></div>
-        <div id="cases" class="admin-list"></div>
+        <p id="admin-status" class="status-message"></p>
+        <div id="admin-list" class="admin-list"></div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="config.js?v=50"></script>
   <script src="admin.js?v=50"></script>
