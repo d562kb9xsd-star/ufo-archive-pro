@@ -20,6 +20,27 @@
     return [];
   }
 
+  function mediaHtml(item) {
+    if (!item.media_url) return "";
+
+    const url = escapeHtml(item.media_url);
+    const type = item.media_type || "";
+
+    if (type.startsWith("video")) {
+      return `
+        <div style="margin:14px 0;">
+          <video src="${url}" controls style="max-width:100%; border-radius:12px;"></video>
+        </div>
+      `;
+    }
+
+    return `
+      <div style="margin:14px 0;">
+        <img src="${url}" alt="UFO evidence" style="max-width:100%; border-radius:12px;" />
+      </div>
+    `;
+  }
+
   try {
     container.innerHTML = "<p>Loading approved UFO cases...</p>";
 
@@ -63,6 +84,9 @@
         <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
         <p><strong>Date:</strong> ${escapeHtml(item.date_observed || item.created_at || "Unknown")}</p>
         <p>${escapeHtml(item.summary || item.description || "")}</p>
+
+        ${mediaHtml(item)}
+
         ${tagHtml ? `<div>${tagHtml}</div>` : ""}
       `;
 
