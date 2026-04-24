@@ -1,7 +1,5 @@
-// ===== CONFIG =====
-const ADMIN_PASSWORD = "ufocases123"; // change this if you want
+const ADMIN_PASSWORD = "ufocases123";
 
-// ===== ELEMENTS =====
 const loginWrap = document.getElementById("admin-login");
 const protectedWrap = document.getElementById("admin-protected");
 const passwordInput = document.getElementById("admin-password");
@@ -11,7 +9,6 @@ const signoutBtn = document.getElementById("admin-signout-btn");
 const listEl = document.getElementById("admin-list");
 const statusEl = document.getElementById("admin-status");
 
-// ===== HELPERS =====
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -28,47 +25,37 @@ function mediaHtml(item) {
   const type = item.media_type || "";
 
   if (type.startsWith("video")) {
-    return `
-      <div style="margin:14px 0;">
-        <video src="${url}" controls style="max-width:100%; border-radius:12px;"></video>
-      </div>
-    `;
+    return `<video src="${url}" controls></video>`;
   }
 
-  return `
-    <div style="margin:14px 0;">
-      <img src="${url}" alt="UFO evidence" style="max-width:100%; border-radius:12px;" />
-    </div>
-  `;
+  return `<img src="${url}" alt="UFO evidence" />`;
 }
 
-// ===== LOAD CASES =====
-async function loadPending() {
-  statusEl.textContent = "Loading pending cases...";
+async function loadCases() {
+  statusEl.textContent = "Loading cases...";
   listEl.innerHTML = "";
 
   try {
     const url =
       window.UFO_APP_CONFIG.supabaseUrl +
-      "/rest/v1/cases?status=eq.pending&select=*&order=created_at.desc";
+      "/rest/v1/cases?select=*&order=created_at.desc&_=" +
+      Date.now();
 
     const res = await fetch(url, {
+      cache: "no-store",
       headers: {
         apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
-        Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`
+        Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
+        "Cache-Control": "no-cache"
       }
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      statusEl.textContent = "Error loading cases: " + text;
-      return;
-    }
-
     const data = await res.json();
 
+    listEl.innerHTML = "";
+
     if (!Array.isArray(data) || data.length === 0) {
-      statusEl.textContent = "No pending cases.";
+      statusEl.textContent = "No cases found.";
       return;
     }
 
@@ -80,65 +67,109 @@ async function loadPending() {
 
       card.innerHTML = `
         <h3>${escapeHtml(item.title || "Untitled")}</h3>
+        <p><strong>Status:</strong> ${escapeHtml(item.status || "Unknown")}</p>
         <p><strong>Location:</strong> ${escapeHtml(item.location || "Unknown")}</p>
-        <p><strong>Date:</strong> ${escapeHtml(item.date_observed || "Unknown")}</p>
-        <p>${escapeHtml(item.summary || "")}</p>
+        <p><strong>Date:</strong> ${escapeHtml(item.date_observed || item.created_at || "Unknown")}</p>
+        <p>${escapeHtml(item.summary || item.description || "")}</p>
 
         ${mediaHtml(item)}
 
-        <div class="admin-actions">
-          <button data-action="approve" data-id="${item.id}">Approve</button>
-          <button data-action="reject" data-id="${item.id}">Reject</button>
-        </div>
-        <hr>
+        <button data-action="approve" data-id="${item.id}">Approve</button>
+        <button data-action="reject" data-id="${item.id}">Reject</button>
+        <button class="danger" data-action="delete" data-id="${item.id}">Delete</button>
       `;
 
       listEl.appendChild(card);
     });
   } catch (error) {
     console.error(error);
-    statusEl.textContent = "Unexpected error loading cases.";
+    statusEl.textContent = "Error loading cases.";
   }
 }
 
-// ===== UPDATE CASE =====
-async function updateCase(id, newStatus) {
+async function updateCase(id, status) {
   statusEl.textContent = "Updating case...";
 
-  try {
-    const url =
-      window.UFO_APP_CONFIG.supabaseUrl +
-      `/rest/v1/cases?id=eq.${encodeURIComponent(id)}`;
+  const url =
+    window.UFO_APP_CONFIG.supabaseUrl +
+    `/rest/v1/cases?id=eq.${encodeURIComponent(id)}`;
 
-    const res = await fetch(url, {
-      method: "PATCH",
-      headers: {
-        apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
-        Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ status: newStatus })
-    });
+  await fetch(url, {
+    method: "PATCH",
+    cache: "no-store",
+    headers: {
+      apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
+      Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      Prefer: "return=minimal"
+    },
+    body: JSON.stringify({ status })
+  });
 
-    if (!res.ok) {
-      const text = await res.text();
-      statusEl.textContent = "Update failed: " + text;
-      return;
-    }
-
-    statusEl.textContent = `Case marked as ${newStatus}.`;
-    await loadPending();
-  } catch (error) {
-    console.error(error);
-    statusEl.textContent = "Unexpected update error.";
-  }
+  await loadCases();
 }
 
-// ===== LOGIN =====
+async function deleteCase(id) {
+  if (!confirm("Delete this case permanently?")) return;
+
+  statusEl.textContent = "Deleting case...";
+
+  const getUrl =
+    window.UFO_APP_CONFIG.supabaseUrl +
+    `/rest/v1/cases?id=eq.${encodeURIComponent(id)}&select=media_path`;
+
+  const getRes = await fetch(getUrl, {
+    cache: "no-store",
+    headers: {
+      apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
+      Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
+      "Cache-Control": "no-cache"
+    }
+  });
+
+  let mediaPath = null;
+
+  if (getRes.ok) {
+    const data = await getRes.json();
+    mediaPath = data?.[0]?.media_path || null;
+  }
+
+  if (mediaPath) {
+    await fetch(
+      window.UFO_APP_CONFIG.supabaseUrl +
+        `/storage/v1/object/ufo-media/${mediaPath}`,
+      {
+        method: "DELETE",
+        cache: "no-store",
+        headers: {
+          apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
+          Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`
+        }
+      }
+    );
+  }
+
+  const deleteUrl =
+    window.UFO_APP_CONFIG.supabaseUrl +
+    `/rest/v1/cases?id=eq.${encodeURIComponent(id)}`;
+
+  await fetch(deleteUrl, {
+    method: "DELETE",
+    cache: "no-store",
+    headers: {
+      apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
+      Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
+      "Cache-Control": "no-cache",
+      Prefer: "return=minimal"
+    }
+  });
+
+  await loadCases();
+}
+
 function unlockAdmin() {
   const entered = passwordInput.value.trim();
-
-  console.log("Entered:", entered); // debug
 
   if (entered !== ADMIN_PASSWORD) {
     loginStatus.textContent = "Wrong password.";
@@ -151,23 +182,18 @@ function unlockAdmin() {
   loginWrap.style.display = "none";
   protectedWrap.style.display = "block";
 
-  loadPending();
+  loadCases();
 }
 
-// ===== LOGOUT =====
 function lockAdmin() {
   sessionStorage.removeItem("ufo_admin_unlocked");
-
   protectedWrap.style.display = "none";
   loginWrap.style.display = "block";
-
-  loginStatus.textContent = "Admin locked.";
-  statusEl.textContent = "";
   listEl.innerHTML = "";
+  statusEl.textContent = "";
   passwordInput.value = "";
 }
 
-// ===== EVENTS =====
 loginBtn.addEventListener("click", unlockAdmin);
 
 passwordInput.addEventListener("keydown", (event) => {
@@ -185,11 +211,11 @@ listEl.addEventListener("click", async (event) => {
 
   if (action === "approve") await updateCase(id, "approved");
   if (action === "reject") await updateCase(id, "rejected");
+  if (action === "delete") await deleteCase(id);
 });
 
-// ===== AUTO LOGIN =====
 if (sessionStorage.getItem("ufo_admin_unlocked") === "yes") {
   loginWrap.style.display = "none";
   protectedWrap.style.display = "block";
-  loadPending();
+  loadCases();
 }
