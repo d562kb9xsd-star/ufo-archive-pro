@@ -1,5 +1,7 @@
-const ADMIN_PASSWORD = "MyUfoAdmin2026!";
+// ===== CONFIG =====
+const ADMIN_PASSWORD = "ufocases123"; // change this if you want
 
+// ===== ELEMENTS =====
 const loginWrap = document.getElementById("admin-login");
 const protectedWrap = document.getElementById("admin-protected");
 const passwordInput = document.getElementById("admin-password");
@@ -9,6 +11,7 @@ const signoutBtn = document.getElementById("admin-signout-btn");
 const listEl = document.getElementById("admin-list");
 const statusEl = document.getElementById("admin-status");
 
+// ===== HELPERS =====
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -39,6 +42,7 @@ function mediaHtml(item) {
   `;
 }
 
+// ===== LOAD CASES =====
 async function loadPending() {
   statusEl.textContent = "Loading pending cases...";
   listEl.innerHTML = "";
@@ -83,9 +87,10 @@ async function loadPending() {
         ${mediaHtml(item)}
 
         <div class="admin-actions">
-          <button class="btn btn-primary" data-action="approve" data-id="${item.id}">Approve</button>
-          <button class="btn btn-secondary" data-action="reject" data-id="${item.id}">Reject</button>
+          <button data-action="approve" data-id="${item.id}">Approve</button>
+          <button data-action="reject" data-id="${item.id}">Reject</button>
         </div>
+        <hr>
       `;
 
       listEl.appendChild(card);
@@ -96,6 +101,7 @@ async function loadPending() {
   }
 }
 
+// ===== UPDATE CASE =====
 async function updateCase(id, newStatus) {
   statusEl.textContent = "Updating case...";
 
@@ -109,8 +115,7 @@ async function updateCase(id, newStatus) {
       headers: {
         apikey: window.UFO_APP_CONFIG.supabaseAnonKey,
         Authorization: `Bearer ${window.UFO_APP_CONFIG.supabaseAnonKey}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({ status: newStatus })
     });
@@ -129,8 +134,11 @@ async function updateCase(id, newStatus) {
   }
 }
 
+// ===== LOGIN =====
 function unlockAdmin() {
   const entered = passwordInput.value.trim();
+
+  console.log("Entered:", entered); // debug
 
   if (entered !== ADMIN_PASSWORD) {
     loginStatus.textContent = "Wrong password.";
@@ -138,22 +146,28 @@ function unlockAdmin() {
   }
 
   sessionStorage.setItem("ufo_admin_unlocked", "yes");
+
   loginStatus.textContent = "";
   loginWrap.style.display = "none";
   protectedWrap.style.display = "block";
+
   loadPending();
 }
 
+// ===== LOGOUT =====
 function lockAdmin() {
   sessionStorage.removeItem("ufo_admin_unlocked");
+
   protectedWrap.style.display = "none";
-  loginWrap.style.display = "grid";
+  loginWrap.style.display = "block";
+
   loginStatus.textContent = "Admin locked.";
   statusEl.textContent = "";
   listEl.innerHTML = "";
   passwordInput.value = "";
 }
 
+// ===== EVENTS =====
 loginBtn.addEventListener("click", unlockAdmin);
 
 passwordInput.addEventListener("keydown", (event) => {
@@ -166,13 +180,14 @@ listEl.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button) return;
 
-  const action = button.dataset.action;
   const id = button.dataset.id;
+  const action = button.dataset.action;
 
   if (action === "approve") await updateCase(id, "approved");
   if (action === "reject") await updateCase(id, "rejected");
 });
 
+// ===== AUTO LOGIN =====
 if (sessionStorage.getItem("ufo_admin_unlocked") === "yes") {
   loginWrap.style.display = "none";
   protectedWrap.style.display = "block";
